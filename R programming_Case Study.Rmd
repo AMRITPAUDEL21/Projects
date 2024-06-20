@@ -1,0 +1,334 @@
+---
+title: "A0024887_Paudel_Case Study"
+author: "Amrit Paudel"
+date: "2024-04-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Introduction
+
+The report consist of my daily activities which incorporates the time frame from my first semester which includes the date ranging from 2023 October 31 to the present days as of 2024 April 16. This is shown in the table below.
+
+| Variable                  | Type         |
+|---------------------------|--------------|
+| Date                      | Identifier   |
+| Zoom                      | Quantitative |
+| Study                     | Quantitative |
+| Sleeping                  | Quantitative |
+| Coffee                    | Quantitative |
+| News                      | Categorical  |
+| Exercise                  | Categorical  |
+| Workout.Intensity (1 - 5) | Categorical  |
+| Workout.Duration          | Quantitative |
+| Semester                  | Categorical  |
+
+Throughout my analysis of this data, I aim to answer three crucial questions about my daily life:
+
+-   **What do I do in a day?** I will analyze the data to provide a detailed description of my typical day, focusing on how I allocate time to various activities.
+
+-   **Do I spend my days how I expect?** This question will allow me to reflect on whether my actual day aligns with my planned schedule and time management expectations.
+
+-   **Is there any difference in how I spend my time this semester compared to last semester?** I will compare the current semester's data against the previous semester's to identify any changes in my daily habits and routines.
+
+This structured exploration and the subsequent analysis will provide deep insights into how I manage my time and whether I am effectively balancing my academic, personal, and health-related activities.
+
+## 1.4 Summary
+
+```{r echo=FALSE}
+data <-read.csv(file = file.choose(), header=TRUE)
+data_3vars<-subset(data, select=c ("Workout.Duration", "Study", "Sleeping"))
+data_3vars
+summary(data_3vars)
+```
+
+### **Interpretation of Summary Statistics:**
+
+The variables that will be analyzed are hours spent studying, hours sleeping, and workout duration. Here, in terms of identifying the variable, the data on hours spent on studying is quantitative, hours spent on sleeping is quantitative, and the workout duration is quantitative. The interpretation of my task are briefly explained below.
+
+-   **Workout Duration**: The average workout lasts about 59 minutes, with a standard deviation of 30 minutes. Most workouts range between 45 to 90 minutes.
+
+-   **Study**: The average studying time is about 100 minutes per day, with a standard deviation of nearly 50 minutes, indicating variability in study habits among days.
+
+-   **Sleeping**: The data shows that I sleep on average about 49 minutes during the day with a high variability shown by the standard deviation of 26 minutes.
+
+#### 1.5 Check the four conditions required for using the t-distribution
+
+Before analyzing the each variables, lets look at the conditions for T-tests.
+
+[**Condition for the T-test distribution:**]{.underline}
+
+-   **Independence Assumption**: the sampled values must be independent of each other
+
+-   **Randomization Condition:** data must be representative of the population and randomly selected
+
+-   **10% Condition**: the sample size, n, must be no larger than 10% of the population.
+
+-   **Normal Condition:** The data come from a distribution that is unimodal and symmetric. This can be checked by making a histogram. Student’s t-models won’t work for data that are badly skewed.
+
+#### Histogram and Box-plot for Hours Spent Studying
+
+```{r echo=FALSE}
+hist(data$Study, xlab="Study Duration (minutes)", main="Histogram for Time Spent on Studying")
+boxplot(data$Study, ylab="Study Duration (Minutes)", main="Boxplot for Time Spent on Studying", horizontal = TRUE)
+```
+
+#### Interpretation:
+
+1.  **Histogram**: Looking at the histogram of my study times, it's evident that my study schedule varies quite a bit from day to day. I see distinct peaks which suggest that on some days I manage to dedicate a good amount of time to studying, while on other days, perhaps due to other commitments, my study time is quite limited.
+
+2.  **Box Plot**: The box plot further confirms this variability but reassuringly shows that there are no extreme outliers—indicating that even on my busiest days, I still manage to fit in some study time. This variability might be something I want to address if I'm aiming for more consistent study habits.histogram for study duration seems fairly symmetrical but has multiple peaks, suggesting a multimodal distribution. This indicates that there might be different typical study during among the participants.
+
+#### Histogram and Box-plot for Sleeping
+
+```{r echo=FALSE}
+hist(data$Sleeping, xlab="Sleep Duration (minutes)", main="Histogram for Time Spent on Sleeping")
+boxplot(data$Sleeping, ylab="Sleep Duration (Minutes)", main="Boxplot for Time Spent on Sleeping", horizontal = TRUE)
+```
+
+#### Interpretation:
+
+-   **Histogram**: The histogram for my sleeping duration is slightly skewed to the right, indicating that on most days, I sleep around a similar amount, but occasionally I have days where I sleep much more than usual. These longer sleeps might be catch-up days.
+
+-   **Box Plot**: The box plot confirms the presence of some longer sleep duration that stand out as high outlines. This suggests that while I generally maintain a consistent sleep schedule, there are days when I extend my sleep significantly.
+
+#### Histogram and Box-plot for Workout Duration
+
+```{r echo=FALSE}
+hist(data$Workout.Duration, xlab="Workout Duration (minutes)", main="Histogram for Time Spent on WorkoutDuration")
+boxplot(data$Workout.Duration, ylab="Workout Duration (Minutes)", main="Boxplot for Time Spent on Workout Duration", horizontal = FALSE)
+```
+
+#### Interpretation
+
+-   **Histogram**: The histogram for my workout duration shows a tendency towards longer sessions with fewer shorter workouts. This indicates a preference or possibly a schedule that accommodates longer workout times.
+
+-   **Box Plot**: The consistency in longer workout duration is clear, with a median leaning towards the upper range, and no significant outlines. This suggests that I'm committed to making the most out of each workout session.
+
+# Data Analysis
+
+## Part 1
+
+### Confidence Mean and Confidence Interval for Studying Hours
+
+```{r echo=FALSE}
+
+data <- mutate(data, Study_hours = Study / 60) # Converting minutes to hours for the study variable since most of the time recoded in minutes format and recored data are above 60
+
+# Function to calculate mean and confidence interval
+calculate_confidence_interval <- function(data, confidence_level = 0.95) {
+  n <- length(data)
+  mean_data <- mean(data)
+  sd_data <- sd(data)
+  error_margin <- qt((1 + confidence_level) / 2, df = n - 1) * (sd_data / sqrt(n))
+  lower_bound <- mean_data - error_margin
+  upper_bound <- mean_data + error_margin
+  return(c(lower_bound, mean_data, upper_bound))
+}
+
+#confidence interval for Study hours
+study_ci <- calculate_confidence_interval(data$Study_hours)
+study_ci
+
+```
+
+Based on the data I have collected and analyzed, the 95% confidence interval for the average number of hours I spend studying each day is approximately 1.54 to 1.80 hours. This finding is crucial for understanding my study habits, as it indicates that on a typical day, I dedicate just over an hour and a half to my studies.
+
+Reflecting on this, I realize that while this amount of study time may seem sufficient for some days, it may not be optimal given my academic goals. The consistency indicated by the narrow range of this interval suggests that my study habits are quite regular.
+
+However, it also prompts me to consider whether I am truly making the most of my study time or if I should explore strategies to enhance my focus and efficiency during these periods. The confidence interval gives me a reliable estimate that helps me evaluate the effectiveness of my current study routines and may guide me to adjust them. For instance, seeing that my study time does not vary widely day to day, I am encouraged to think about increasing the intensity or duration of my study sessions on certain days, especially when approaching critical deadlines or exams. This analysis not only helps me in planning my daily schedule more effectively but also serves as a baseline to measure the impact of any changes I might implement in my approach to studying in the future.
+
+```{r echo=FALSE}
+
+study_mean <- mean(data$Study)
+study_std <- sd(data$Study)
+study_n <- length(data$Study)
+study_se <- study_std / sqrt(study_n)
+study_ci <- qt(c(0.025, 0.975), df = study_n - 1) * study_se + study_mean
+
+```
+
+### Confidence Interval for Sleeping hours
+
+```{r echo=FALSE}
+
+data <- mutate(data, Sleeping_hours = Sleeping / 60)
+# Converting minutes to hours for the sleeping variable since most of the time recoded in minutes format.
+
+calculate_confidence_interval <- function(data, confidence_level = 0.95) {
+  n <- length(data)
+  mean_data <- mean(data)
+  sd_data <- sd(data)
+  error_margin <- qt((1 + confidence_level) / 2, df = n - 1) * (sd_data / sqrt(n))
+  lower_bound <- mean_data - error_margin
+  upper_bound <- mean_data + error_margin
+  return(c(lower_bound, mean_data, upper_bound))
+}
+
+#Calculate confidence interval for Sleeping hours
+sleeping_ci <- calculate_confidence_interval(data$Sleeping_hours)
+sleeping_ci
+
+
+```
+
+This confidence interval indicates that the average number of hours I spend sleeping per day is between approximately 0.74 and 0.88 hours (44.4 to 52.8 minutes). This result is highly unusual as it suggests an extremely low average sleep duration, which is far below the typical 7-9 hours recommended for adult health.
+
+### Confidence Interval for Workout Durations
+
+```{r echo=FALSE}
+library(dplyr)
+
+calculate_confidence_interval <- function(data, confidence_level = 0.95) {
+  n <- length(data)
+  mean_data <- mean(data) 
+  sd_data <- sd(data) 
+  error_margin <- qt((1 + confidence_level) / 2, df = n - 1) * (sd_data / sqrt(n)) 
+
+  # Margin of error
+  lower_bound <- mean_data - error_margin # Lower bound of the CI
+  upper_bound <- mean_data + error_margin # Upper bound of the CI
+  return(c(lower_bound, mean_data, upper_bound))
+}
+
+# confidence interval for Workout Duration
+workout_duration_ci <- calculate_confidence_interval(data$Workout.Duration)
+workout_duration_ci
+
+
+
+```
+
+The 95% confidence interval for the mean workout duration per day, based on the provided data, is approximately **54.6 to 64.2 minutes**. The interval indicates that there is a consistent length to my workout sessions, which is beneficial for developing a stable exercise habit. On the other hand, as the workout duration generally falls within this 10-minute range, it suggests a disciplined approach to your fitness regimen.
+
+## **Part 2: One-Sample Hypothesis Tests**
+
+```{r echo=FALSE}
+
+data$Study_hours <- data$Study / 60 # Study column is recorded in minutes
+
+# One-sample t-test to test if the mean study hours are greater than 3.13 hours
+#Null Hypothesis: Mean study hours <= 3.13 (mu = 3.13)
+#Alternative Hypothesis: Mean study hours > 3.13
+
+t_test_result <- t.test(data$Study_hours, mu = 3.13, alternative = "greater")
+t_test_result
+
+
+```
+
+**Interpretation:** Here, the null hypothesis is not rejected as there is not sufficient evidence at the 5% level of significance to conclude that the mean number of hours spent studying per day is greater than 3.13 hours. In another words, it is understood that I do not study more than 3.13 hours per day, indicating that my study duration might be less than or equal to the duration reported for McGill students.
+
+### 2b)How many hours do you think you spend sleeping per day? Test your hypothesis using a two-sided test at the 0.05 level of significance. 
+
+### In your report, write out the hypotheses using the proper notation, report the p-value, make a final decision (reject or do not reject), and interpret the decision.
+
+```{r echo=FALSE}
+
+data$Sleeping_hours <- data$Sleeping / 60  # converting sleeping data which is recoreded in minutes to hours for accurate comparison
+
+hypothesized_mean <- 7   #hypothesized mean sleep hour
+
+# two-sided t-test to check if the mean sleep hours are significantly different from the hypothesized mean
+t_test_result <- t.test(data$Sleeping_hours, mu = hypothesized_mean, alternative = "two.sided")
+t_test_result
+
+```
+
+**Interpretation**: Given that the p-value is 0.04, which is less than the significance level of 0.05, I reject the null hypothesis. This result suggests that there is statistically significant evidence to conclude that the actual average number of hours spent sleeping per day significantly differs from 7 hours.
+
+### 2c) Create a set of hypotheses to test relating to your quantitative variable of choice (variable 9). Test at the 0.05 level of significance. In your report, write out the hypotheses using the proper notation, report the p-value, make a final decision (reject or do not reject), and interpret the decision. 
+
+```{r echo=FALSE}
+  
+library(dplyr)
+
+data$Workout.Duration <- data$Workout.Duration
+
+benchmark_duration <- 60  # Benchmark duration in minutes
+
+# Set up hypotheses for clarity in the output
+null_hypothesis <- "H0: The mean workout duration is equal to 60 minutes."
+alternative_hypothesis <- "H1: The mean workout duration is not equal to 60 minutes."
+
+# Perform a two-sided t-test to check if the mean workout duration is significantly different from the benchmark
+t_test_result <- t.test(data$Workout.Duration, mu = benchmark_duration, alternative = "two.sided")
+
+# Output the hypotheses
+cat("Null Hypothesis:", null_hypothesis, "\n")
+cat("Alternative Hypothesis:", alternative_hypothesis, "\n")
+
+# Output the results of the t-test including the p-value
+print(t_test_result)
+
+
+
+```
+
+Since the p-value (0.812) is much greater than the significance level (0.05), the hypothesis is accepted as there isn't sufficient statistical evidence to demonstrate that the observed data significantly deviates from what was expected under the null hypothesis.
+
+## **Part 3: Two-Sample Hypothesis Tests**
+
+```{r echo=FALSE}
+data$Semester <- data$Semester
+data_sem1 <- filter(data, Semester == "1")
+data_sem2 <- filter(data, Semester == "2")  # Creating subsets for each semester
+
+# 10 random days from each semester
+sample_sem1 <- sample_n(data_sem1, 10, replace = TRUE)
+sample_sem2 <- sample_n(data_sem2, 10, replace = TRUE)
+
+# equality of variances (
+var.test(sample_sem1$Study_hours, sample_sem2$Study_hours)
+
+# Welch's t-test if variances are not equal
+t_test_results <- t.test(sample_sem1$Study_hours, sample_sem2$Study_hours, alternative = "greater", var.equal = FALSE)
+t_test_results
+
+```
+
+**Interpretation:** Here, null hypothesis is not rejected as there is not sufficient evidence to conclude that the mean study hours in semester 1 are greater than in semester 2.
+
+### 3.c) create new variables by selecting the first 10 days of observations from semester 1 (F21) and the first 10 days of observations from semester 2 (W22). 
+
+```{r}
+
+data_sem1 <- filter(data, Semester == "1") %>% slice(1:10)
+data_sem2 <- filter(data, Semester == "2") %>% slice(1:10)
+
+# Perform Welch's t-test (unpooled)
+t_test_results <- t.test(data_sem1$Study_hours, data_sem2$Study_hours, alternative = "greater", var.equal = FALSE)
+t_test_results
+
+```
+
+Here, the P-Value: 0.7941 which is significantly greater than the significance level (0.05), herem I do not reject the null hypothesis. There is not sufficient statistical evidence at the 5% level to conclude that there is a significant difference in study hours between the two semesters being compared.
+
+## Conclusion
+
+### **1. What Do You Do in a Day?**
+
+In a typical day, I allocate approximately 1.6 to 1.8 hours to studying, about 44 to 53 minutes for sleeping (based on the unusual findings suggesting a misrecording or need for adjustment in data collection), and maintain a regular workout routine averaging between 55 to 64 minutes per session. These activities represent the core components of my daily routine, reflecting my focus on academic tasks, physical health, and necessary albeit insufficient rest.
+
+### **2. Do You Spend Your Days How You Expect?**
+
+My days are partially spent as expected with consistent workout and study routines; however, the significantly low sleep duration recorded was unexpected and highlights a potential error in how sleep was tracked or reported. While I manage to maintain consistent study and exercise routines, the lack of sufficient sleep as recorded could have serious implications if accurate, suggesting a need for immediate adjustment in lifestyle or data recording practices.
+
+### **3. Is There Any Difference in How You Spend Your Time This Semester Compared to Last Semester?**
+
+Based on the analysis conducted, particularly the statistical tests comparing study hours between semesters, there is no significant difference in the amount of time spent studying between the two semesters. This stability suggests that despite potential shifts in course load or teaching strategies, I've maintained a consistent study routine across both semesters.
+
+### **4. What Have You Learned About Yourself and Your Daily Habits by Completing the Report?**
+
+Completing this report has provided several insights into my daily habits and their implications:
+
+-   **Consistency in Habits**: My ability to maintain consistent study and exercise routines even with varying academic pressures is a positive indicator of my discipline and time management skills.
+
+-   **Data Recording Issues**: The surprising findings related to sleep duration have highlighted the importance of accurate data tracking and the need to review and possibly overhaul how I record and interpret my sleep data.
+
+-   **No Significant Seasonal Shifts**: The lack of significant differences in study time between semesters reassures me that my academic engagement is stable, not significantly influenced by seasonal or semester-specific changes.
+
+-   **Awareness and Adjustment**: This analysis has made me more aware of the need to ensure balance in all aspects of health—academic, physical, and sleep—to maintain overall well-being. It underscores the importance of revisiting and adjusting my routines and recording methods to better reflect and support my personal and academic goals.
